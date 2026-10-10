@@ -8,7 +8,7 @@ public class App {
 
         while (isRunning) {
             if (User.isLoggedIn) {
-                TransactionTracker.showMenu(isRunning);
+                TransactionTracker.showMainMenu();
                 continue;
             }
 
