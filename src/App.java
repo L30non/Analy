@@ -2,6 +2,8 @@ import java.util.Scanner;
 
 public class App {
     // ============== Authentication System ==============
+    static boolean isLoggedIn = false;
+
     static boolean isPasswordStrong(String password) {
         /* Should have at least one special character
          * Should have at least five characters long
@@ -52,8 +54,31 @@ public class App {
     }
 
     static void login() {
-        // Login code goes here
-        System.out.println("This is login");
+        Scanner input = new Scanner(System.in);
+
+        String username = "";
+        while (username.isEmpty()) {
+            System.out.print("Enter your username: ");
+            username = input.nextLine().trim();
+
+            if (username.isEmpty()) {
+                System.out.println("Error: Username cannot be empty. Please try again.\n");
+            }
+        }
+
+        String password = "";
+        while (password.isEmpty()) {
+            System.out.print("Enter your password: ");
+            password = input.next().trim();
+
+            if (password.isEmpty()) {
+                System.out.println("Error: Password cannot be empty. Please try again.\n");
+            }
+        }
+
+        /* For simplicity, any non-empty credentials = successful login */
+        isLoggedIn = true;
+        System.out.println("Successfully logged in!\n");
     }
 
     public static void main(String[] args) {
@@ -67,6 +92,9 @@ public class App {
         switch (mode) {
             case "1":
                 login();
+                if (isLoggedIn) {
+                    TransactionTracker.showMenu();
+                }
                 break;
             case "2":
                 register();
