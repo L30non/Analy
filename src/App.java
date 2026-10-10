@@ -34,6 +34,7 @@ public class App {
                     break;
                 case "3":
                     System.out.println("Thank you for using Analy!");
+                    input.close();
                     isRunning = false;
                     System.exit(0);
                     break;
