@@ -8,11 +8,10 @@ public class TransactionTracker {
     static int expenseCount = 0;
 
     // ============== Main Menu ==============
-    public static void showMenu() {
+    public static void showMenu(boolean isRunning) {
         Scanner input = new Scanner(System.in);
-        boolean running = true;
 
-        while (running) {
+        while (isRunning) {
             System.out.println("\n========================================");
             System.out.println("      Transaction Tracking System      ");
             System.out.println("========================================");
@@ -40,7 +39,9 @@ public class TransactionTracker {
                     deleteExpense();
                     break;
                 case "5":
-                    running = false;
+                    User.isLoggedIn = false;
+                    isRunning = false;
+                    System.exit(0);
                     System.out.println("Thank you for using Analy!");
                     break;
                 default:
