@@ -72,7 +72,14 @@ public class TransactionTracker {
         if (categoryCount == 0) return;
 
         System.out.print("Enter Category ID you want to work with: ");
-        int catId = Integer.parseInt(input.nextLine().trim());
+        int catId;
+        try {
+            catId = Integer.parseInt(input.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid ID format.");
+            return;
+        }
+
         int index = catId - 1;
 
         if (index < 0 || index >= categoryCount) {
@@ -88,6 +95,7 @@ public class TransactionTracker {
             System.out.println("1. View Expenses in this Category");
             System.out.println("2. Add Expense to this Category");
             System.out.println("3. Delete Expense from this Category");
+            System.out.println("4. Update Expense in this Category");
             System.out.println("0. Back to Main Menu");
             System.out.println("----------------------------------------");
             System.out.print("Choose an action: ");
@@ -106,6 +114,9 @@ public class TransactionTracker {
                     deleteExpenseFromCategory(input, catId);
                     displayCategoryDetails(catId);
                     break;
+                case "4":
+                    updateExpenseInCategory(input, catId);
+                    break;
                 case "0":
                     inCategory = false;
                     System.out.println("Exiting category workspace...");
@@ -116,7 +127,7 @@ public class TransactionTracker {
         }
     }
 
-    // ============== Display Single Category Details (Category-Relative IDs) ==============
+    // ============== Display Single Category Details ==============
     static void displayCategoryDetails(int catId) {
         int catIndex = catId - 1;
         System.out.println("\nCategory: " + categoryNames[catIndex] + " [ ID = " + catId + " ]");
@@ -135,7 +146,7 @@ public class TransactionTracker {
             System.out.println(String.format("    %-6s | %-12s | %-18s | %s", "ID", "Name", "Description", "Amount"));
             System.out.println("    --------------------------------------------------------");
             
-            int displayId = 1; // Starts at 1 for each category independently
+            int displayId = 1;
             for (int j = 0; j < expenseCount; j++) {
                 if (expenseCategoryIds[j] == catId) {
                     System.out.println(String.format("    %-6d | %-12s | %-18s | $%.2f", 
@@ -164,19 +175,39 @@ public class TransactionTracker {
         }
     }
 
-    // ============== Add Category ==============
+    // ============== Add Category (With Duplicate Check) ==============
     static void addCategory(Scanner input) {
         System.out.println("\n--- Add Category ---");
         if (categoryCount >= categoryNames.length) {
             System.out.println("Error: Category storage is full.");
             return;
         }
-        System.out.print("Enter category name: ");
-        String name = input.nextLine().trim();
-        if (name.isEmpty()) {
-            System.out.println("Error: Category name cannot be empty.");
-            return;
+
+        String name = "";
+        while (true) {
+            System.out.print("Enter category name: ");
+            name = input.nextLine().trim();
+
+            if (name.isEmpty()) {
+                System.out.println("Error: Category name cannot be empty.");
+                continue;
+            }
+
+            boolean exists = false;
+            for (int i = 0; i < categoryCount; i++) {
+                if (categoryNames[i].equalsIgnoreCase(name)) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (exists) {
+                System.out.println("Error: A category with this name already exists. Please enter a different name.");
+            } else {
+                break;
+            }
         }
+
         categoryNames[categoryCount] = name;
         categoryCount++;
         System.out.println("Success: Category added successfully!");
@@ -186,7 +217,14 @@ public class TransactionTracker {
     static void deleteCategory(Scanner input) {
         System.out.println("\n--- Delete Category ---");
         System.out.print("Enter Category ID to delete: ");
-        int catId = Integer.parseInt(input.nextLine().trim());
+        int catId;
+        try {
+            catId = Integer.parseInt(input.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid ID format.");
+            return;
+        }
+
         int index = catId - 1;
 
         if (index < 0 || index >= categoryCount) {
@@ -221,7 +259,14 @@ public class TransactionTracker {
     static void updateCategory(Scanner input) {
         System.out.println("\n--- Update Category Name ---");
         System.out.print("Enter Category ID to update: ");
-        int catId = Integer.parseInt(input.nextLine().trim());
+        int catId;
+        try {
+            catId = Integer.parseInt(input.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid ID format.");
+            return;
+        }
+
         int index = catId - 1;
 
         if (index < 0 || index >= categoryCount) {
@@ -250,12 +295,30 @@ public class TransactionTracker {
 
         System.out.print("Enter expense name: ");
         String name = input.nextLine().trim();
+        while (name.isEmpty()) {
+            System.out.println("Error: Expense name cannot be empty.");
+            System.out.print("Enter expense name: ");
+            name = input.nextLine().trim();
+        }
 
-        System.out.print("Enter description: ");
+        System.out.print("Enter description (optional): ");
         String desc = input.nextLine().trim();
 
-        System.out.print("Enter amount: ");
-        double amount = Double.parseDouble(input.nextLine().trim());
+        double amount = 0.0;
+        while (true) {
+            System.out.print("Enter amount: ");
+            String amtStr = input.nextLine().trim();
+            try {
+                amount = Double.parseDouble(amtStr);
+                if (amount > 0) {
+                    break;
+                } else {
+                    System.out.println("Error: Amount must be greater than zero.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid input. Please enter valid numbers only.");
+            }
+        }
 
         expenseNames[expenseCount] = name;
         expenseDescriptions[expenseCount] = desc;
@@ -266,16 +329,23 @@ public class TransactionTracker {
         System.out.println("Success: Expense added successfully!");
     }
 
-    // ============== Delete Expense from Specific Category (Using Relative ID) ==============
-    static void deleteExpenseFromCategory(Scanner input, int catId) {
-        System.out.println("\n--- Delete Expense ---");
-        System.out.print("Enter Expense ID to delete: ");
-        int targetLocalId = Integer.parseInt(input.nextLine().trim());
+    // ============== Update Existing Expense in Category ==============
+    static void updateExpenseInCategory(Scanner input, int catId) {
+        displayCategoryDetails(catId);
+
+        System.out.println("\n--- Update Expense ---");
+        System.out.print("Enter Expense ID to update: ");
+        int targetLocalId;
+        try {
+            targetLocalId = Integer.parseInt(input.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid ID format.");
+            return;
+        }
 
         int currentLocalId = 1;
         int targetGlobalIndex = -1;
 
-        // Map the relative category ID to the correct global array index
         for (int j = 0; j < expenseCount; j++) {
             if (expenseCategoryIds[j] == catId) {
                 if (currentLocalId == targetLocalId) {
@@ -291,7 +361,74 @@ public class TransactionTracker {
             return;
         }
 
-        // Shift expense arrays down to close gap
+        System.out.print("Enter new expense name (" + expenseNames[targetGlobalIndex] + "): ");
+        String newName = input.nextLine().trim();
+        if (!newName.isEmpty()) {
+            expenseNames[targetGlobalIndex] = newName;
+        }
+
+        System.out.print("Enter new description (optional) (" + expenseDescriptions[targetGlobalIndex] + "): ");
+        String newDesc = input.nextLine().trim();
+        if (!newDesc.isEmpty()) {
+            expenseDescriptions[targetGlobalIndex] = newDesc;
+        }
+
+        double newAmount = 0.0;
+        while (true) {
+            System.out.print("Enter new amount ($" + expenseAmounts[targetGlobalIndex] + "): ");
+            String amtStr = input.nextLine().trim();
+            if (amtStr.isEmpty()) {
+                // Keep previous amount if user just presses enter
+                newAmount = expenseAmounts[targetGlobalIndex];
+                break;
+            }
+            try {
+                newAmount = Double.parseDouble(amtStr);
+                if (newAmount > 0) {
+                    break;
+                } else {
+                    System.out.println("Error: Amount must be greater than zero.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid input. Please enter valid numbers only.");
+            }
+        }
+        expenseAmounts[targetGlobalIndex] = newAmount;
+
+        System.out.println("Success: Expense updated successfully!");
+        displayCategoryDetails(catId);
+    }
+
+    // ============== Delete Expense from Specific Category ==============
+    static void deleteExpenseFromCategory(Scanner input, int catId) {
+        System.out.println("\n--- Delete Expense ---");
+        System.out.print("Enter Expense ID to delete: ");
+        int targetLocalId;
+        try {
+            targetLocalId = Integer.parseInt(input.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid ID format.");
+            return;
+        }
+
+        int currentLocalId = 1;
+        int targetGlobalIndex = -1;
+
+        for (int j = 0; j < expenseCount; j++) {
+            if (expenseCategoryIds[j] == catId) {
+                if (currentLocalId == targetLocalId) {
+                    targetGlobalIndex = j;
+                    break;
+                }
+                currentLocalId++;
+            }
+        }
+
+        if (targetGlobalIndex == -1) {
+            System.out.println("Error: Expense ID not found in this category.");
+            return;
+        }
+
         for (int i = targetGlobalIndex; i < expenseCount - 1; i++) {
             expenseNames[i] = expenseNames[i + 1];
             expenseDescriptions[i] = expenseDescriptions[i + 1];
