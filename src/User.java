@@ -40,7 +40,13 @@ public class User {
         String username = "";
         while (username.isEmpty()) {
             System.out.print("Enter your username: ");
-            username = input.nextLine().trim();
+            username = input.next().trim();
+
+            System.out.println("\n---- Password requirements ---- ");
+            System.out.println("- at least one special character");
+            System.out.println("- at least five characters long");
+            System.out.println("- at least one number");
+            System.out.println("- at least one Capital letter");
 
             if (username.isEmpty()) {
                 System.out.println("Error: Username cannot be empty. Please try again.\n");
@@ -51,7 +57,8 @@ public class User {
         boolean isStrong = false;
         do {
             System.out.print("Enter your password: ");
-            password = input.next().trim();;
+            password = input.next().trim();
+
 
             if (password.isEmpty()) {
                 System.out.println("Please enter your username and password");
@@ -79,7 +86,7 @@ public class User {
         String username = "";
         while (username.isEmpty()) {
             System.out.print("Enter your username: ");
-            username = input.nextLine().trim();
+            username = input.next().trim();
 
             if (username.isEmpty()) {
                 System.out.println("Error: Username cannot be empty. Please try again.\n");
