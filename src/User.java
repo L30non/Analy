@@ -79,37 +79,48 @@ public class User {
     static void login() {
         Scanner input = new Scanner(System.in);
 
+        String username = "";
+        String password = "";
+        boolean isMatch = false;
+
         System.out.println("==========================");
         System.out.println("         Login Page       ");
         System.out.println("==========================");
 
-        String username = "";
-        while (username.isEmpty()) {
-            System.out.print("Enter your username: ");
-            username = input.next().trim();
+        do {
+            // Reset the username and password
+            username = "";
+            password = "";
 
-            if (username.isEmpty()) {
-                System.out.println("Error: Username cannot be empty. Please try again.\n");
+            while (username.isEmpty()) {
+                System.out.print("Enter your username: ");
+                username = input.next().trim();
+
+                if (username.isEmpty()) {
+                    System.out.println("Error: Username cannot be empty. Please try again.\n");
+                }
             }
-        }
 
-        String password = "";
-        while (password.isEmpty()) {
-            System.out.print("Enter your password: ");
-            password = input.next().trim();
 
-            if (password.isEmpty()) {
-                System.out.println("Error: Password cannot be empty. Please try again.\n");
+            while (password.isEmpty()) {
+                System.out.print("Enter your password: ");
+                password = input.next().trim();
+
+                if (password.isEmpty()) {
+                    System.out.println("Error: Password cannot be empty. Please try again.\n");
+                }
             }
-        }
 
-        // Check if password is match what the user have entered
-        if (registeredUser.username.equals(username) && registeredUser.password.equals(password)) {
-            isLoggedIn = true;
-            System.out.println("Successfully logged in!\n");
-        } else {
-            isLoggedIn = false;
-            System.out.println("Invalid credential. Please enter again");
-        }
+            // Check if password is match what the user have entered
+            if (registeredUser.username.equals(username) && registeredUser.password.equals(password)) {
+                isLoggedIn = true;
+                isMatch = true;
+                System.out.println("Successfully logged in!\n");
+            } else {
+                isLoggedIn = false;
+                isMatch = false;
+                System.out.println("Invalid credential. Please enter again");
+            }
+        } while (!isMatch);
     }
 }
