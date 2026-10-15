@@ -13,6 +13,17 @@ public class TransactionTracker {
     static int expenseCount = 0;
 
     public static void main(String[] args) {
+        // Seed initial demo data
+        categoryNames[0] = "Food";
+        categoryNames[1] = "Transport";
+        categoryCount = 2;
+
+        expenseNames[0] = "Lunch";
+        expenseDescriptions[0] = "Meal with coworker";
+        expenseAmounts[0] = 12.50;
+        expenseCategoryIds[0] = 1;
+        expenseCount = 1;
+
         showMainMenu();
     }
 
@@ -58,7 +69,6 @@ public class TransactionTracker {
                 case "0":
                     running = false;
                     System.out.println("Thank you for using Transaction Tracking System!");
-                    System.exit(0);
                     break;
                 default:
                     System.out.println("Invalid option. Please enter a valid choice.");
@@ -214,7 +224,7 @@ public class TransactionTracker {
         System.out.println("Success: Category added successfully!");
     }
 
-    // ============== Delete Category (With Blocking Rule) ==============
+    // ============== Delete Category ==============
     static void deleteCategory(Scanner input) {
         System.out.println("\n--- Delete Category ---");
         System.out.print("Enter Category ID to delete: ");
@@ -233,30 +243,43 @@ public class TransactionTracker {
             return;
         }
 
+        // Automatically delete all expenses associated with this category
         for (int j = 0; j < expenseCount; j++) {
             if (expenseCategoryIds[j] == catId) {
-                System.out.println("Error: Cannot delete category because it still contains expenses!");
-                System.out.println("Please delete those expenses first.");
-                return;
+                // Shift subsequent expenses down
+                for (int k = j; k < expenseCount - 1; k++) {
+                    expenseNames[k] = expenseNames[k + 1];
+                    expenseDescriptions[k] = expenseDescriptions[k + 1];
+                    expenseAmounts[k] = expenseAmounts[k + 1];
+                    expenseCategoryIds[k] = expenseCategoryIds[k + 1];
+                }
+                expenseNames[expenseCount - 1] = null;
+                expenseDescriptions[expenseCount - 1] = null;
+                expenseAmounts[expenseCount - 1] = 0.0;
+                expenseCategoryIds[expenseCount - 1] = 0;
+                expenseCount--;
+                j--; // Re-evaluate current index after shift
             }
         }
 
+        // Shift categories down
         for (int i = index; i < categoryCount - 1; i++) {
             categoryNames[i] = categoryNames[i + 1];
         }
         categoryNames[categoryCount - 1] = null;
         categoryCount--;
 
+        // Adjust remaining expense category IDs
         for (int j = 0; j < expenseCount; j++) {
             if (expenseCategoryIds[j] > catId) {
                 expenseCategoryIds[j]--;
             }
         }
 
-        System.out.println("Success: Category deleted successfully!");
+        System.out.println("Success: Category and its expenses deleted successfully!");
     }
 
-    // ============== Update Category Name ==============
+    // ============== Update Category Name (With Duplicate Check) ==============
     static void updateCategory(Scanner input) {
         System.out.println("\n--- Update Category Name ---");
         System.out.print("Enter Category ID to update: ");
@@ -279,6 +302,20 @@ public class TransactionTracker {
         String newName = input.nextLine().trim();
         if (newName.isEmpty()) {
             System.out.println("Error: Category name cannot be empty.");
+            return;
+        }
+
+        // Check for duplicate names (excluding current category)
+        boolean exists = false;
+        for (int i = 0; i < categoryCount; i++) {
+            if (i != index && categoryNames[i].equalsIgnoreCase(newName)) {
+                exists = true;
+                break;
+            }
+        }
+
+        if (exists) {
+            System.out.println("Error: A category with this name already exists.");
             return;
         }
 
@@ -379,7 +416,6 @@ public class TransactionTracker {
             System.out.print("Enter new amount ($" + expenseAmounts[targetGlobalIndex] + "): ");
             String amtStr = input.nextLine().trim();
             if (amtStr.isEmpty()) {
-                // Keep previous amount if user just presses enter
                 newAmount = expenseAmounts[targetGlobalIndex];
                 break;
             }
