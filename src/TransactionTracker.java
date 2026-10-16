@@ -68,7 +68,7 @@ public class TransactionTracker {
                     break;
                 case "0":
                     running = false;
-                    System.out.println("Thank you for using Transaction Tracking System!");
+                    System.out.println("Thank you for using Analy!");
                     break;
                 default:
                     System.out.println("Invalid option. Please enter a valid choice.");
